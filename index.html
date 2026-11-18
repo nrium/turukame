@@ -221,7 +221,7 @@
       <div class="stepper">
         <button type="button" class="btn" id="panelMinus" aria-label="パネル展示の人数を減らす">−</button>
         <div class="count">
-          <input id="panelInput" type="number" inputmode="numeric" min="0" max="99" value="17" aria-label="パネル展示の人数">
+          <input id="panelInput" type="number" inputmode="numeric" min="0" max="99" value="20" aria-label="パネル展示の人数">
           <span>人</span>
         </div>
         <button type="button" class="btn" id="panelPlus" aria-label="パネル展示の人数を増やす">＋</button>
@@ -241,7 +241,7 @@
       <div class="stepper">
         <button type="button" class="btn" id="monitorMinus" aria-label="モニター展示の人数を減らす">−</button>
         <div class="count">
-          <input id="monitorInput" type="number" inputmode="numeric" min="0" max="99" value="10" aria-label="モニター展示の人数">
+          <input id="monitorInput" type="number" inputmode="numeric" min="0" max="99" value="4" aria-label="モニター展示の人数">
           <span>人</span>
         </div>
         <button type="button" class="btn" id="monitorPlus" aria-label="モニター展示の人数を増やす">＋</button>
@@ -256,7 +256,7 @@
   <p class="hint" id="hint">計算中…</p>
 
   <div class="mini-actions">
-    <button type="button" id="resetBtn">17 × 10 に戻す</button>
+    <button type="button" id="resetBtn">20 × 4 に戻す</button>
     <button type="button" id="zeroBtn">0にする</button>
   </div>
 
@@ -434,7 +434,7 @@
   pIn.addEventListener('change', function(){ pIn.value = getP(); update(); });
   mIn.addEventListener('change', function(){ mIn.value = getM(); update(); });
 
-  document.getElementById('resetBtn').addEventListener('click', function(){ pIn.value = 17; mIn.value = 10; update(); });
+  document.getElementById('resetBtn').addEventListener('click', function(){ pIn.value = 20; mIn.value = 4; update(); });
   document.getElementById('zeroBtn').addEventListener('click', function(){ pIn.value = 0; mIn.value = 0; update(); });
 
   update();
