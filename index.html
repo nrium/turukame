@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light" />
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="data:," />
+<title>つるかめ算シミュレーター</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ color-scheme: light; }
+  :root{
+    --bg:#fff8ec;
+    --dot:#ffe9c9;
+    --surface:#ffffff;
+    --ink:#4b3a2f;
+    --muted:#a08b7a;
+    --line:#f3e2d3;
+    --pink:#ff6f9a;
+    --pink-dark:#e84a78;
+    --pink-bg:#fff0f4;
+    --pink-btn:#ff8fb0;
+    --teal:#2fbfae;
+    --teal-dark:#0f8a7d;
+    --teal-bg:#eafaf7;
+    --teal-btn:#4fd1c0;
+    --safe:#22a85e;
+    --safe-bg:#e9fbeF;
+    --safe-bg2:#d9f7e3;
+    --out:#f05252;
+    --out-bg:#fff1f1;
+    --out-bg2:#ffe3e3;
+    --shadow:0 6px 0 rgba(75,58,47,.06), 0 12px 24px rgba(75,58,47,.07);
+  }
+  @media (max-width: 0px){
+    :root{
+      --bg:#221c1a;
+      --dot:#2e2623;
+      --surface:#2f2825;
+      --ink:#fff3e8;
+      --muted:#c9b3a3;
+      --line:#4a3d36;
+      --pink:#ff8fb0;
+      --pink-dark:#ffb3c6;
+      --pink-bg:#3a2530;
+      --pink-btn:#c44a6e;
+      --teal:#4fd1c0;
+      --teal-dark:#8fe8dc;
+      --teal-bg:#1e3330;
+      --teal-btn:#1f7a6e;
+      --safe:#4ade80;
+      --safe-bg:#173824;
+      --safe-bg2:#1d4a2d;
+      --out:#f87171;
+      --out-bg:#3d1f1f;
+      --out-bg2:#4a2424;
+      --shadow:0 6px 0 rgba(0,0,0,.2), 0 12px 24px rgba(0,0,0,.25);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    color:var(--ink);
+    font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif;
+    background:var(--bg);
+    background-image:radial-gradient(var(--dot) 2.2px, transparent 2.3px);
+    background-size:26px 26px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  button,input{font:inherit}
+  .app{
+    max-width:520px;
+    margin:0 auto;
+    min-height:100dvh;
+    padding:14px 14px 10px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  @media (min-width:640px){
+    .app{padding-top:22px; gap:12px}
+  }
+  /* header - tiny */
+  header{text-align:center; line-height:1.2; padding:2px 0 0}
+  header h1{margin:0; font-size:22px; font-weight:800; letter-spacing:.04em}
+  header h1 .accent-p{color:var(--pink-dark)}
+  header h1 .accent-t{color:var(--teal-dark)}
+  header p{margin:3px 0 0; font-size:13px; color:var(--muted); font-weight:700}
+  header p b{color:var(--ink); background:var(--surface); border:1.5px dashed var(--muted); padding:1px 7px; border-radius:999px; font-size:13px}
+
+  /* verdict */
+  .verdict{
+    background:var(--out-bg);
+    border:3px solid #ffb3b3;
+    border-radius:28px;
+    padding:12px 14px 12px;
+    text-align:center;
+    box-shadow:var(--shadow);
+  }
+  @media (max-width: 0px){ .verdict{border-color:#7a3a3a} }
+  .verdict.is-safe{background:var(--safe-bg); border-color:#7fe0a3}
+  @media (max-width: 0px){ .verdict.is-safe{border-color:#2f7a4a} }
+  .verdict-top{display:flex; align-items:center; justify-content:center; gap:10px}
+  .verdict-word{font-size:52px; line-height:1; font-weight:800; letter-spacing:.02em}
+  .verdict.is-safe .verdict-word{color:var(--safe)}
+  .verdict:not(.is-safe) .verdict-word{color:var(--out)}
+  .verdict-face{font-size:28px; line-height:1}
+  .verdict-total{font-size:14px; font-weight:700; color:var(--muted); margin-top:4px}
+  .verdict-total strong{font-size:26px; color:var(--ink); font-weight:800; letter-spacing:.02em}
+  .verdict-diff{font-size:15px; font-weight:800; margin-top:1px}
+  .bar{height:10px; background:rgba(0,0,0,.08); border-radius:999px; overflow:hidden; margin-top:9px}
+  @media (max-width: 0px){.bar{background:rgba(255,255,255,.14)}}
+  .bar i{display:block; height:100%; width:0%; border-radius:999px; transition:width .2s ease}
+  .verdict.is-safe .bar i{background:var(--safe)}
+  .verdict:not(.is-safe) .bar i{background:var(--out)}
+  .bar-meta{display:flex; justify-content:space-between; font-size:11px; color:var(--muted); font-weight:700; margin-top:3px}
+
+  /* controls */
+  .controls{display:flex; flex-direction:column; gap:10px}
+  .card{
+    background:var(--surface);
+    border-radius:24px;
+    padding:10px 12px 12px;
+    box-shadow:var(--shadow);
+    border:2.5px solid transparent;
+  }
+  .card-pink{background:var(--pink-bg); border-color:#ffd1de}
+  .card-teal{background:var(--teal-bg); border-color:#bfeee7}
+  @media (max-width: 0px){
+    .card-pink{border-color:#5c3544}
+    .card-teal{border-color:#2a4f4a}
+  }
+  .card-head{display:flex; justify-content:space-between; align-items:baseline; padding:0 4px 6px}
+  .card-head .name{font-size:17px; font-weight:800}
+  .card-pink .name{color:var(--pink-dark)}
+  .card-teal .name{color:var(--teal-dark)}
+  .card-head .unit{font-size:12px; font-weight:700; color:var(--muted)}
+  .card-head .sub{font-size:13px; font-weight:800}
+  .stepper{display:flex; align-items:center; gap:10px}
+  .btn{
+    width:68px; height:68px; flex:0 0 68px;
+    border-radius:50%; border:none; cursor:pointer;
+    color:#fff; font-size:36px; font-weight:800; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 5px 0 rgba(0,0,0,.12);
+    touch-action:manipulation; user-select:none;
+  }
+  .btn:active{transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.12)}
+  .card-pink .btn{background:var(--pink-btn)}
+  .card-teal .btn{background:var(--teal-btn)}
+  @media (max-width: 0px){
+    .card-pink .btn,.card-teal .btn{color:#fff}
+  }
+  .count{
+    flex:1; background:var(--surface); border-radius:18px; height:68px;
+    display:flex; align-items:center; justify-content:center; gap:2px;
+    border:2px solid var(--line);
+  }
+  .count input{
+    width:2.2em; border:none; background:transparent; text-align:center;
+    font-size:38px; font-weight:800; color:var(--ink); padding:0; outline:none;
+    -moz-appearance:textfield; appearance:textfield;
+  }
+  .count input::-webkit-outer-spin-button,.count input::-webkit-inner-spin-button{-webkit-appearance:none}
+  .count span{font-size:16px; font-weight:800; color:var(--muted); margin-top:10px}
+
+  /* hint - one line */
+  .hint{
+    text-align:center; font-size:13.5px; font-weight:700; line-height:1.45;
+    background:var(--surface); border:1.5px dashed #e8c9a8; border-radius:999px;
+    padding:7px 12px; color:var(--ink);
+  }
+  .hint b{color:var(--pink-dark)}
+  .hint b.t{color:var(--teal-dark)}
+
+  .mini-actions{display:flex; justify-content:center; gap:8px}
+  .mini-actions button{
+    border:1.5px solid var(--line); background:var(--surface); color:var(--muted);
+    font-size:12.5px; font-weight:700; padding:6px 12px; border-radius:999px; cursor:pointer; min-height:32px;
+  }
+
+  details{margin-top:auto; background:var(--surface); border-radius:16px; border:1px solid var(--line); padding:8px 12px}
+  details summary{font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; list-style:none; text-align:center; min-height:28px; display:flex; align-items:center; justify-content:center}
+  details summary::-webkit-details-marker{display:none}
+  .detail-body{font-size:12.5px; line-height:1.6; color:var(--muted); padding:6px 2px 4px; border-top:1px dashed var(--line); margin-top:6px}
+  .detail-body b{color:var(--ink)}
+  .detail-body .row{margin:6px 0}
+  .detail-body .calc{background:var(--bg); border-radius:8px; padding:4px 8px; font-weight:700; color:var(--ink); display:inline-block; margin-top:2px}
+
+  @media (max-height:700px){
+    .app{gap:8px; padding-top:10px}
+    .verdict-word{font-size:44px}
+    .verdict{padding:9px 12px}
+    .btn{width:60px;height:60px;flex-basis:60px;font-size:32px}
+    .count{height:60px}
+    .count input{font-size:34px}
+    header h1{font-size:20px}
+  }
+</style>
+</head>
+<body>
+<main class="app">
+  <header>
+    <h1>つるかめ算 <span class="accent-p">パネル</span> × <span class="accent-t">モニター</span></h1>
+    <p>目標 <b>70,900円</b> をこえたらセーフ！</p>
+  </header>
+
+  <section class="verdict" id="verdict" aria-live="polite">
+    <div class="verdict-top">
+      <span class="verdict-face" id="face">😢</span>
+      <span class="verdict-word" id="verdictWord">アウト</span>
+      <span class="verdict-face" id="face2">😢</span>
+    </div>
+    <div class="verdict-total">合計 <strong id="totalText">71,000</strong> 円</div>
+    <div class="verdict-diff" id="diffText">あと 0円</div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="bar-meta"><span id="pctText">0%</span><span>70,900円</span></div>
+  </section>
+
+  <div class="controls">
+    <section class="card card-pink" aria-label="パネル参加">
+      <div class="card-head">
+        <span class="name">🖼️ パネル</span>
+        <span class="unit">1人 2,200円</span>
+        <span class="sub" id="panelSub">55,000円</span>
+      </div>
+      <div class="stepper">
+        <button type="button" class="btn" id="panelMinus" aria-label="パネルを減らす">−</button>
+        <div class="count">
+          <input id="panelInput" type="number" inputmode="numeric" min="0" max="99" value="25" aria-label="パネル人数">
+          <span>人</span>
+        </div>
+        <button type="button" class="btn" id="panelPlus" aria-label="パネルを増やす">＋</button>
+      </div>
+    </section>
+
+    <section class="card card-teal" aria-label="モニター参加">
+      <div class="card-head">
+        <span class="name">🖥️ モニター</span>
+        <span class="unit">1人 1,600円</span>
+        <span class="sub" id="monitorSub">16,000円</span>
+      </div>
+      <div class="stepper">
+        <button type="button" class="btn" id="monitorMinus" aria-label="モニターを減らす">−</button>
+        <div class="count">
+          <input id="monitorInput" type="number" inputmode="numeric" min="0" max="99" value="10" aria-label="モニター人数">
+          <span>人</span>
+        </div>
+        <button type="button" class="btn" id="monitorPlus" aria-label="モニターを増やす">＋</button>
+      </div>
+    </section>
+  </div>
+
+  <p class="hint" id="hint">あと少し！</p>
+
+  <div class="mini-actions">
+    <button type="button" id="justSafeBtn">ギリギリセーフにする</button>
+    <button type="button" id="resetBtn">25 × 10 に戻す</button>
+    <button type="button" id="zeroBtn">0にする</button>
+  </div>
+
+  <details>
+    <summary>数字の内訳をみる ▽</summary>
+    <div class="detail-body">
+      <div class="row"><b>パネル</b>　参加費8,000円 − 個別経費 約5,800円 ＝ <b>2,200円</b><br><span class="calc">2,413＋2,000＋367＋1,000＝5,780円</span><br>パネル、ステッカー2種、コースター、梱包材や送料</div>
+      <div class="row"><b>モニター</b>　参加費5,000円 − 個別経費 約2,400円 ＝ <b>1,600円</b><br><span class="calc">1,000＋367＋1,000＝2,367円</span><br>ステッカー2種、コースター、梱包材や送料</div>
+      <div class="row"><b>全体経費 約70,900円</b><br><span class="calc">58,750＋1,000＋1,100＋10,000＝70,850円</span><br>会場費、モニター代、ひっつき虫、その他消耗品や備品</div>
+    </div>
+  </details>
+</main>
+
+<script>
+(function(){
+  var TARGET=70900, PU=2200, MU=1600;
+  var pIn=document.getElementById('panelInput'), mIn=document.getElementById('monitorInput');
+  var verdict=document.getElementById('verdict'), word=document.getElementById('verdictWord');
+  var totalEl=document.getElementById('totalText'), diffEl=document.getElementById('diffText');
+  var bar=document.getElementById('barFill'), pct=document.getElementById('pctText');
+  var pSub=document.getElementById('panelSub'), mSub=document.getElementById('monitorSub');
+  var hint=document.getElementById('hint'), face=document.getElementById('face'), face2=document.getElementById('face2');
+  function fmt(n){return n.toLocaleString('ja-JP')}
+  function clamp(n){ if(isNaN(n))return 0; n=Math.floor(n); return Math.max(0,Math.min(99,n)); }
+  function getP(){return clamp(parseInt(pIn.value,10))}
+  function getM(){return clamp(parseInt(mIn.value,10))}
+  function setP(n){pIn.value=clamp(n); update();}
+  function setM(n){mIn.value=clamp(n); update();}
+  function update(){
+    var p=getP(), m=getM(), ps=p*PU, ms=m*MU, total=ps+ms, safe=total>TARGET, diff=total-TARGET;
+    pSub.textContent=fmt(ps)+'円'; mSub.textContent=fmt(ms)+'円'; totalEl.textContent=fmt(total);
+    verdict.classList.toggle('is-safe',safe);
+    if(safe){
+      word.textContent='セーフ！'; face.textContent='🎉'; face2.textContent='🎉';
+      diffEl.textContent='✨ '+fmt(diff)+'円 こえたよ！';
+      if(diff<=600) hint.innerHTML='ギリギリセーフ！ 1人減るとアウトだよ';
+      else hint.innerHTML='この人数なら大丈夫◎ 合計 <b>'+(p+m)+'人</b> でセーフ';
+    }else{
+      word.textContent='アウト'; face.textContent='💦'; face2.textContent='💦';
+      var short=TARGET-total;
+      if(total===0) diffEl.textContent='まだ 0円だよ';
+      else if(short===0) diffEl.textContent='ちょうど 70,900円…あと少し！';
+      else diffEl.textContent='あと '+fmt(short)+'円 たりない…';
+      var needP=Math.floor(short/PU)+1, needM=Math.floor(short/MU)+1;
+      hint.innerHTML='あと <b>パネル '+needP+'人</b> か <b class="t">モニター '+needM+'人</b> でセーフ！';
+    }
+    var pc=total/TARGET*100; bar.style.width=Math.min(pc,100)+'%'; pct.textContent=(Math.round(pc*10)/10)+' %';
+  }
+  // tap + hold to repeat
+  function bindHold(id, fn){
+    var el=document.getElementById(id), timer=null, delay=null;
+    function start(e){ e.preventDefault(); fn(); delay=setTimeout(function(){ timer=setInterval(fn,90); },380); }
+    function stop(){ clearTimeout(delay); clearInterval(timer); timer=null; delay=null; }
+    el.addEventListener('pointerdown', start);
+    el.addEventListener('pointerup', stop); el.addEventListener('pointerleave', stop); el.addEventListener('pointercancel', stop);
+    el.addEventListener('click', function(e){ if(e.detail===0){ fn(); } else { e.preventDefault(); } });
+    el.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  }
+  // Use simple click for accessibility + hold via pointerdown already calls fn once; avoid double from click
+  // So bindHold handles it; remove extra click handlers
+  bindHold('panelPlus', function(){ setP(getP()+1); });
+  bindHold('panelMinus', function(){ setP(getP()-1); });
+  bindHold('monitorPlus', function(){ setM(getM()+1); });
+  bindHold('monitorMinus', function(){ setM(getM()-1); });
+  pIn.addEventListener('input', function(){ update(); });
+  mIn.addEventListener('input', function(){ update(); });
+  pIn.addEventListener('change', function(){ pIn.value=getP(); update(); });
+  mIn.addEventListener('change', function(){ mIn.value=getM(); update(); });
+  document.getElementById('resetBtn').addEventListener('click', function(){ pIn.value=25; mIn.value=10; update(); });
+  document.getElementById('zeroBtn').addEventListener('click', function(){ pIn.value=0; mIn.value=0; update(); });
+  document.getElementById('justSafeBtn').addEventListener('click', function(){
+    var m=getM(), rem=TARGET-m*MU, need=rem<0?0:Math.floor(rem/PU)+1;
+    if(need>60){ pIn.value=25; mIn.value=10; } else { pIn.value=need; }
+    update();
+  });
+  update();
+})();
+</script>
+</body>
+</html>
