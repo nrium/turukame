@@ -264,14 +264,26 @@
     <summary>数字の内訳をみる ▽</summary>
     <div class="detail-body">
       <div class="row">
+        値段は人数で切り替わります<br>
+        パネル展示の人数が18人以上、かつモニター展示の人数が3人以上なら安い単価になります（それ以外は通常単価）<br>
+        パネル代：通常は1,594円、安い単価のときは1,551円<br>
+        ステッカー代：通常は2,000円、安い単価のときは1,659円<br>
+        モニターのステッカー代：通常は1,000円、安い単価のときは829.5円<br>
+        コースター代：通常は367円、安い単価のときは359円
+      </div>
+      <div class="row">
         <b>パネル展示の経費*1</b>
-        <span class="calc">2413+2000+367+1000+47000÷パネル展示の人数＋1100÷パネル展示の人数＝A</span>
-        つまり A ＝ 5780 ＋ 48100÷パネル展示の人数
+        <span class="calc">【通常単価のとき】1594+2000+367+1000+47000÷パネル展示の人数＋1100÷パネル展示の人数＝A</span>
+        つまり A ＝ 4961 ＋ 48100÷パネル展示の人数
+        <span class="calc">【パネル展示の人数が18人以上、かつモニター展示の人数が3人以上のとき】1551+1659+359+1000+47000÷パネル展示の人数＋1100÷パネル展示の人数＝A</span>
+        つまり A ＝ 4569 ＋ 48100÷パネル展示の人数
       </div>
       <div class="row">
         <b>モニター展示の経費*2</b>
-        <span class="calc">1000+367+1000+3000÷モニター展示の人数=B</span>
+        <span class="calc">【通常単価のとき】1000+367+1000+3000÷モニター展示の人数=B</span>
         つまり B ＝ 2367 ＋ 3000÷モニター展示の人数
+        <span class="calc">【パネル展示の人数が18人以上、かつモニター展示の人数が3人以上のとき】1000+359+829.5+3000÷モニター展示の人数=B</span>
+        つまり B ＝ 2188.5 ＋ 3000÷モニター展示の人数
       </div>
       <div class="row">
         <b>その他経費*3</b>
@@ -331,19 +343,25 @@
   function getM(){ return clamp(parseInt(mIn.value, 10)); }
 
   // 1人あたり金額（円未満は四捨五入）。人数0のときは null（割り算しない）
-  function calcPanel(p){
+  // 安い単価の条件：パネル展示の人数が18人以上、かつモニター展示の人数が3人以上（パネル側・モニター側とも同じ条件）
+  // 条件を満たすとき：パネルは1,551円／1,659円／359円、モニターはコースター代359円、ステッカー代829.5円（モニター代1,000円は変わらず）
+  // 満たさないとき：パネルは1,594円／2,000円／367円、モニターはコースター代367円、ステッカー代1,000円
+  function isCheap(p, m){ return p >= 18 && m >= 3; }
+  function calcPanel(p, m){
     if (p === 0) return null;
-    var a = Math.round(5780 + 48100 / p);
+    var base = isCheap(p, m) ? 4569 : 4961;
+    var a = Math.round(base + 48100 / p);
     return { a: a, ap: 8000 - a };
   }
-  function calcMonitor(m){
+  function calcMonitor(m, p){
     if (m === 0) return null;
-    var b = Math.round(2367 + 3000 / m);
+    var base = isCheap(p, m) ? 2188.5 : 2367;
+    var b = Math.round(base + 3000 / m);
     return { b: b, bp: 5000 - b };
   }
   // 合計：四捨五入後の1人あたり充当額 × 人数（0人は0円分）
   function totalFor(p, m){
-    var pc = calcPanel(p), mc = calcMonitor(m);
+    var pc = calcPanel(p, m), mc = calcMonitor(m, p);
     var t = 0;
     if (pc) t += pc.ap * p;
     if (mc) t += mc.bp * m;
@@ -359,7 +377,7 @@
 
   function update(){
     var p = getP(), m = getM();
-    var pc = calcPanel(p), mc = calcMonitor(m);
+    var pc = calcPanel(p, m), mc = calcMonitor(m, p);
     var ps = pc ? pc.ap * p : 0;
     var ms = mc ? mc.bp * m : 0;
     var total = ps + ms;
